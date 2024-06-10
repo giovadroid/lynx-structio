@@ -1,9 +1,9 @@
 //!
-//! This crate provides a way to monitor files and execute a callback when a file is modified
-//! Also, it provides a way to save and load structs to and from files
+//! This crate provides derive macro to automatically implement the FileStructTrait trait for a struct
+//! The FileStructTrait trait provides the save, load, and reload functions
+//! Optionally, the struct can be watched for changes in the file
 //! Requires the serde Serialize and Deserialize traits
 //!
-//! Also provides a proc macro to derive the Save and Load traits or to watch a file for changes
 //!
 //! # Example
 //! ```
