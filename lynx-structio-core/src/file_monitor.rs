@@ -62,7 +62,7 @@ impl FileMonitor {
         if !STOP_FLAG.load(std::sync::atomic::Ordering::Relaxed) {
             SHOULD_UPDATE.store(true, std::sync::atomic::Ordering::Relaxed);
         }
-        log::debug!("Registered file: {:?}", file_path);
+        log::debug!("Start monitoring file {:?} ", file_path);
         Ok(locker)
     }
 
@@ -84,25 +84,25 @@ impl FileMonitor {
                 let mut watcher = notify::recommended_watcher(move |res| {
                     match res {
                         Ok(event) => FileMonitor::handle_event(event, &file_actions_handler.read()),
-                        Err(e) => log::error!("watch error: {:?}", e),
+                        Err(e) => log::error!("Internal error reading fs event, reason: {:?}", e),
                     }
-                }).expect("Failed to create watcher");
+                }).expect("Internal error, can not watch for files");
 
                 SHOULD_UPDATE.store(true, std::sync::atomic::Ordering::Relaxed);
-                log::debug!("Starting file monitor");
+                log::debug!("Start monitoring files");
 
                 while !STOP_FLAG.load(std::sync::atomic::Ordering::Relaxed) {
                     if SHOULD_UPDATE.load(std::sync::atomic::Ordering::Relaxed) {
                         for path in listen_files.iter() {
                             if let Err(err) = watcher.unwatch(Path::new(path)){
-                                log::error!("Failed to unwatch: {:?}", err);
+                                log::error!("Unable to unwatch file {:?} reason: {}", path, err);
                             }
                         }
 
                         let lockers = file_actions.clone().read().clone();
                         for (path, _) in lockers.iter() {
                             if let Err(err) = watcher.watch(Path::new(path), RecursiveMode::NonRecursive){
-                                log::error!("Failed to watch: {:?}", err);
+                                log::error!("Unable to start watching file {:?}, reason {}", path, err);
                                 continue;
                             }
                             listen_files.push(path.clone());
@@ -143,7 +143,7 @@ impl FileMonitor {
                 match kind {
                     notify::event::AccessKind::Close(_) => {
                         let path = event.paths.first().unwrap();
-                        log::debug!("Dispatching file change by file closed: {:?}", path);
+                        log::trace!("Dispatching file change by file closed: {:?}", path);
 
                         let file_action = file_actions.get(path).unwrap();
                         FileMonitor::raise_update(file_action);
@@ -155,7 +155,7 @@ impl FileMonitor {
                 match kind {
                     notify::event::ModifyKind::Data(_) => {
                         let path = event.paths.first().unwrap();
-                        log::debug!("Dispatching file change by data update: {:?}", path);
+                        log::trace!("Dispatching file change by data update: {:?}", path);
 
                         let file_action = file_actions.get(path).unwrap();
                         FileMonitor::raise_update(file_action);
