@@ -1,0 +1,14 @@
+[package]
+name = "lynx-structio-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+serde = "1.0.203"
+serde_yaml = "0.9.34+deprecated"
+log = "0.4.21"
+notify = "6.1.1"
+parking_lot = "0.12.3"
+tokio = { version = "1.38.0", features = ["rt", "time"] }
+lazy_static = "1.4.0"

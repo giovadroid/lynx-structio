@@ -1,0 +1,13 @@
+[package]
+name = "lynx-structio"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+lynx-structio-macros = { path = "lynx-structio-macros" }
+lynx-structio-core = { path = "lynx-structio-core" }
+
+[dev-dependencies]
+parking_lot = "0.12.3"
+serde = { version = "1.0.203", features = ["derive"] }
+tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
