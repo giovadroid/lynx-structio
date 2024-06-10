@@ -20,6 +20,7 @@
     number: i32,
  }
 
+// Can use FileStruct instead of FileWatch to only save and load the struct without monitoring the file
  #[derive(FileWatch, Default, Clone)]
  struct FileDataStruct{
      data: Arc<RwLock<DataStruct>>,
