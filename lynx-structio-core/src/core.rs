@@ -11,8 +11,10 @@ pub fn save<Instance, Serializable>(instance: &Instance) -> MonitorResult<()>
     if !path.exists() && !path.parent().unwrap().exists() {
         std::fs::create_dir_all(path.parent().unwrap())?;
     }
+    GLOBAL_FILE_MONITOR.lock_file(&path)?;
     std::fs::write(&path, serde_yaml::to_string(&instance.content())?)?;
     log::trace!("Saved to {:?}", path);
+    GLOBAL_FILE_MONITOR.unlock_file(&path)?;
     Ok(())
 }
 

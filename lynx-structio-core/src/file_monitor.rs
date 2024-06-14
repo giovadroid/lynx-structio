@@ -45,6 +45,30 @@ impl FileMonitor {
     }
 
     ///
+    /// Lock the file if is registered
+    ///
+    pub fn lock_file(&self, path: &Path) -> MonitorResult<()> {
+        let file_actions = self.file_actions.read();
+        if let Some(file_action) = file_actions.get(path) {
+            log::debug!("Locking file {:?}", path);
+            file_action.locker.store(true, std::sync::atomic::Ordering::Relaxed);
+        }
+        Ok(())
+    }
+
+    ///
+    /// Unlock the file if is registered
+    ///
+    pub fn unlock_file(&self, path: &Path) -> MonitorResult<()> {
+        let file_actions = self.file_actions.read();
+        if let Some(file_action) = file_actions.get(path) {
+            log::debug!("Unlocking file {:?}", path);
+            file_action.locker.store(false, std::sync::atomic::Ordering::Relaxed);
+        }
+        Ok(())
+    }
+
+    ///
     /// Register a file to be monitored
     ///
     pub fn register_file<F>(&self, path: String, monitor: F) -> MonitorResult<Arc<AtomicBool>>
